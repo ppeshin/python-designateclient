@@ -17,6 +17,7 @@ import requests
 from stevedore import extension
 from designateclient import exceptions
 from designateclient.auth import KeystoneAuth
+import re
 
 
 class Client(object):
@@ -99,6 +100,8 @@ class Client(object):
         elif response.status_code == 500:
             raise exceptions.Unknown(**response.json())
         else:
+            # fix incorrect format for timestamps in json
+            response._content = re.sub(r'timestamp\((\d*.\d)\)', r'"\1"', response.content)
             return response
 
     def get(self, path, **kw):
